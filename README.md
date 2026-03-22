@@ -2,7 +2,7 @@
 
 A community-curated, auto-updating directory of **Claude Skills** — reusable SKILL.md prompt modules that make Claude smarter at specific tasks.
 
-👉 **Live site:** https://your-username.github.io/claude-skills/
+👉 **Live site:** https://abeezith.github.io/claude-skills/
 
 ---
 
