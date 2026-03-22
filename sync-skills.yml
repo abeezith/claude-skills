@@ -1,0 +1,36 @@
+name: Sync Claude Skills from GitHub
+
+on:
+  schedule:
+    - cron: '0 2 * * *'   # runs every day at 2am UTC
+  workflow_dispatch:       # manual trigger from GitHub UI
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write      # needed to commit skills.json back to the repo
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests PyGithub python-dateutil
+
+      - name: Run skill discovery script
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/sync_skills.py
+
+      - name: Commit updated skills.json
+        run: |
+          git config user.name "skills-bot"
+          git config user.email "skills-bot@users.noreply.github.com"
+          git add skills.json
+          git diff --cached --quiet || git commit -m "chore: sync skills $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git push

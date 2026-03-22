@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Claude Skills Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0D0D0D;
+    --surface: #141414;
+    --surface2: #1c1c1c;
+    --border: rgba(255,255,255,0.07);
+    --accent: #6366F1;
+    --accent-dim: rgba(99,102,241,0.15);
+    --accent-glow: rgba(99,102,241,0.35);
+    --text: #E8E8E8;
+    --text-dim: #777;
+    --text-muted: #444;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+    --radius: 10px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid lines background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    height: 56px;
+    background: rgba(13,13,13,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    text-decoration: none;
+    letter-spacing: 0.02em;
+  }
+
+  .nav-logo .logo-mark {
+    width: 28px; height: 28px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .nav-link {
+    font-size: 13px;
+    color: var(--text-dim);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-link:hover { color: var(--text); }
+
+  .btn-submit {
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 7px 16px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .btn-submit:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 96px 24px 72px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .hero-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-dim);
+    border: 1px solid rgba(99,102,241,0.3);
+    padding: 5px 14px;
+    border-radius: 100px;
+    margin-bottom: 28px;
+  }
+
+  .hero h1 {
+    font-size: clamp(32px, 6vw, 56px);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #fff 30%, rgba(255,255,255,0.5));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero p {
+    font-size: 17px;
+    color: var(--text-dim);
+    max-width: 520px;
+    margin: 0 auto 40px;
+    font-weight: 300;
+  }
+
+  .hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    font-family: var(--mono);
+  }
+
+  .stat-item { text-align: center; }
+
+  .stat-num {
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--text);
+    display: block;
+    letter-spacing: -0.02em;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .how-section {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto 72px;
+    padding: 0 24px;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 32px;
+    text-align: center;
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .step {
+    background: var(--surface);
+    padding: 28px 24px;
+    position: relative;
+  }
+
+  .step-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+  }
+
+  .step h3 {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .step p {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  /* ── CONTROLS ── */
+  .controls {
+    position: relative;
+    z-index: 1;
+    max-width: 1160px;
+    margin: 0 auto 28px;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 220px;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 14px;
+    pointer-events: none;
+  }
+
+  #search {
+    width: 100%;
+    padding: 10px 14px 10px 40px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  #search::placeholder { color: var(--text-muted); }
+  #search:focus { border-color: var(--accent); }
+
+  .category-tabs {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 8px 14px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .tab:hover { border-color: rgba(99,102,241,0.4); color: var(--text); }
+  .tab.active {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .sort-wrap {
+    margin-left: auto;
+  }
+
+  #sort {
+    padding: 9px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 12px;
+    outline: none;
+    cursor: pointer;
+  }
+  #sort:focus { border-color: var(--accent); }
+
+  /* ── SKILLS GRID ── */
+  .skills-section {
+    position: relative;
+    z-index: 1;
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  #skills-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  @media (max-width: 900px) { #skills-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { #skills-grid { grid-template-columns: 1fr; } }
+
+  /* ── SKILL CARD ── */
+  .skill-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    opacity: 0;
+    transform: translateY(16px);
+    animation: fadeUp 0.4s forwards;
+  }
+
+  .skill-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(99,102,241,0.4);
+    box-shadow: 0 8px 32px rgba(99,102,241,0.12);
+  }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .card-emoji {
+    font-size: 24px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .card-star {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 3px 8px;
+    border-radius: 100px;
+    flex-shrink: 0;
+  }
+
+  .card-name {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .card-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    flex: 1;
+  }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .card-author {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .card-author img {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--surface2);
+  }
+
+  .card-date {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-left: auto;
+  }
+
+  .card-category {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 9px;
+    border-radius: 100px;
+    border: 1px solid;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .cat-Files    { color: #60A5FA; border-color: rgba(96,165,250,0.3); background: rgba(96,165,250,0.08); }
+  .cat-Design   { color: #F472B6; border-color: rgba(244,114,182,0.3); background: rgba(244,114,182,0.08); }
+  .cat-Data     { color: #34D399; border-color: rgba(52,211,153,0.3); background: rgba(52,211,153,0.08); }
+  .cat-Writing  { color: #FBBF24; border-color: rgba(251,191,36,0.3); background: rgba(251,191,36,0.08); }
+  .cat-Meta     { color: #A78BFA; border-color: rgba(167,139,250,0.3); background: rgba(167,139,250,0.08); }
+  .cat-Community{ color: #94A3B8; border-color: rgba(148,163,184,0.3); background: rgba(148,163,184,0.08); }
+
+  .card-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .btn-view {
+    width: 100%;
+    padding: 9px 0;
+    font-family: var(--mono);
+    font-size: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.18s;
+    letter-spacing: 0.03em;
+    text-align: center;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--accent-dim);
+    border: 1px solid rgba(99,102,241,0.3);
+    color: var(--accent);
+  }
+  .btn-view:hover {
+    background: rgba(99,102,241,0.25);
+    border-color: var(--accent);
+    color: #fff;
+    transform: translateY(-1px);
+  }
+
+  /* Topics */
+  .card-topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    min-height: 0;
+  }
+  .topic-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--surface2);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+
+  .card-fork {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  /* ── SKELETON ── */
+  .skeleton-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .skel {
+    background: linear-gradient(90deg, var(--surface2) 25%, rgba(40,40,40,0.8) 50%, var(--surface2) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    border-radius: 4px;
+  }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+
+  /* ── EMPTY STATE ── */
+  #empty-state {
+    display: none;
+    text-align: center;
+    padding: 80px 24px;
+    color: var(--text-dim);
+  }
+  #empty-state .empty-icon { font-size: 40px; margin-bottom: 16px; }
+  #empty-state h3 { font-size: 18px; margin-bottom: 8px; font-weight: 500; }
+  #empty-state p { font-size: 14px; color: var(--text-muted); }
+
+  /* ── ERROR STATE ── */
+  #error-state {
+    display: none;
+    text-align: center;
+    padding: 80px 24px;
+  }
+  #error-state h3 { font-size: 18px; margin-bottom: 8px; }
+  #error-state p { font-size: 14px; color: var(--text-dim); margin-bottom: 24px; }
+  .btn-retry {
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 10px 24px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn-retry:hover { opacity: 0.85; }
+
+  /* ── SUBMIT CTA ── */
+  .cta-section {
+    position: relative;
+    z-index: 1;
+    max-width: 640px;
+    margin: 0 auto 80px;
+    padding: 0 24px;
+    text-align: center;
+  }
+
+  .cta-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 48px 32px;
+  }
+
+  .cta-box h2 {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+  }
+
+  .cta-box p {
+    font-size: 14px;
+    color: var(--text-dim);
+    margin-bottom: 28px;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .cta-box a {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 12px 28px;
+    background: var(--accent);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: opacity 0.2s;
+  }
+  .cta-box a:hover { opacity: 0.85; }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .footer-left {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .footer-right {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  #last-synced { color: var(--text-dim); }
+
+  @media (max-width: 700px) {
+    nav { padding: 0 16px; }
+    .hero { padding: 64px 16px 48px; }
+    .steps { grid-template-columns: 1fr; }
+    footer { flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">
+    <span class="logo-mark">⚡</span>
+    claude-skills
+  </a>
+  <div class="nav-right">
+    <a class="nav-link" href="#how-it-works">How it works</a>
+    <a class="nav-link" href="https://github.com/your-username/claude-skills" target="_blank">GitHub</a>
+    <a class="btn-submit" href="https://github.com/your-username/claude-skills/issues/new" target="_blank">+ Submit Skill</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-tag">Open Source · Auto-Updated Daily</div>
+  <h1>The Claude Skills Library</h1>
+  <p>Reusable SKILL.md modules that make Claude smarter at specific tasks — curated by the community, discovered automatically from GitHub.</p>
+  <div class="hero-stats">
+    <div class="stat-item">
+      <span class="stat-num" id="stat-total">—</span>
+      <span class="stat-label">Skills</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num" id="stat-categories">6</span>
+      <span class="stat-label">Categories</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">Daily</span>
+      <span class="stat-label">Sync</span>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how-it-works">
+  <div class="section-label">How it works</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01 / DETECT</div>
+      <h3>Claude reads your message</h3>
+      <p>Claude identifies your intent and checks if a matching SKILL.md module is available for the task.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02 / LOAD</div>
+      <h3>The skill is loaded</h3>
+      <p>Claude loads the SKILL.md file, which contains precise instructions, edge cases, and output format guidance.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03 / EXECUTE</div>
+      <h3>Best-practice output</h3>
+      <p>Claude follows the skill's instructions to deliver consistent, high-quality results every time.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input type="text" id="search" placeholder="Search skills, authors, descriptions…" autocomplete="off"/>
+  </div>
+  <div class="category-tabs" id="category-tabs">
+    <button class="tab active" data-cat="All">All</button>
+    <button class="tab" data-cat="Files">Files</button>
+    <button class="tab" data-cat="Design">Design</button>
+    <button class="tab" data-cat="Data">Data</button>
+    <button class="tab" data-cat="Writing">Writing</button>
+    <button class="tab" data-cat="Meta">Meta</button>
+    <button class="tab" data-cat="Community">Community</button>
+  </div>
+  <div class="sort-wrap">
+    <select id="sort">
+      <option value="stars">Sort: Stars</option>
+      <option value="newest">Sort: Newest</option>
+      <option value="az">Sort: A–Z</option>
+    </select>
+  </div>
+</div>
+
+<!-- SKILLS GRID -->
+<section class="skills-section">
+  <div id="skills-grid">
+    <!-- skeletons -->
+    <div class="skeleton-card"><div class="skel" style="height:24px;width:40%"></div><div class="skel" style="height:14px"></div><div class="skel" style="height:14px;width:70%"></div><div class="skel" style="height:32px"></div></div>
+    <div class="skeleton-card"><div class="skel" style="height:24px;width:40%"></div><div class="skel" style="height:14px"></div><div class="skel" style="height:14px;width:70%"></div><div class="skel" style="height:32px"></div></div>
+    <div class="skeleton-card"><div class="skel" style="height:24px;width:40%"></div><div class="skel" style="height:14px"></div><div class="skel" style="height:14px;width:70%"></div><div class="skel" style="height:32px"></div></div>
+    <div class="skeleton-card"><div class="skel" style="height:24px;width:40%"></div><div class="skel" style="height:14px"></div><div class="skel" style="height:14px;width:70%"></div><div class="skel" style="height:32px"></div></div>
+    <div class="skeleton-card"><div class="skel" style="height:24px;width:40%"></div><div class="skel" style="height:14px"></div><div class="skel" style="height:14px;width:70%"></div><div class="skel" style="height:32px"></div></div>
+    <div class="skeleton-card"><div class="skel" style="height:24px;width:40%"></div><div class="skel" style="height:14px"></div><div class="skel" style="height:14px;width:70%"></div><div class="skel" style="height:32px"></div></div>
+  </div>
+  <div id="empty-state">
+    <div class="empty-icon">🔭</div>
+    <h3>No skills found</h3>
+    <p>Try a different search term or category.</p>
+  </div>
+  <div id="error-state">
+    <h3>⚠️ Couldn't load skills</h3>
+    <p>Failed to fetch skills.json. Make sure the file exists in the repo root.</p>
+    <button class="btn-retry" onclick="loadSkills()">Retry</button>
+  </div>
+</section>
+
+<!-- SUBMIT CTA -->
+<section class="cta-section">
+  <div class="cta-box">
+    <h2>Built a useful skill?</h2>
+    <p>Share it with the community. Submit your SKILL.md repo and it'll be auto-discovered on the next daily sync.</p>
+    <a href="https://github.com/your-username/claude-skills/issues/new" target="_blank">→ Submit a Skill</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left">⚡ claude-skills — Skills that make Claude smarter</div>
+  <div class="footer-right">Last synced: <span id="last-synced">—</span></div>
+</footer>
+
+<script>
+  let allSkills = [];
+  let activeCategory = 'All';
+  let activeSort = 'stars';
+  let searchQuery = '';
+
+  // ── Load data ──
+  function loadSkills() {
+    document.getElementById('error-state').style.display = 'none';
+    document.getElementById('skills-grid').innerHTML = [1,2,3,4,5,6].map(() => `
+      <div class="skeleton-card">
+        <div class="skel" style="height:24px;width:40%"></div>
+        <div class="skel" style="height:14px"></div>
+        <div class="skel" style="height:14px;width:70%"></div>
+        <div class="skel" style="height:32px"></div>
+      </div>`).join('');
+
+    fetch('./skills.json?_=' + Date.now())
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(data => {
+        allSkills = data.skills || [];
+        document.getElementById('stat-total').textContent = allSkills.length;
+        const synced = data.meta?.last_synced;
+        if (synced) document.getElementById('last-synced').textContent = formatDate(synced);
+        render();
+      })
+      .catch(() => {
+        document.getElementById('skills-grid').innerHTML = '';
+        document.getElementById('error-state').style.display = 'block';
+      });
+  }
+
+  // ── Render ──
+  function render() {
+    let skills = allSkills.slice();
+
+    // Filter by category
+    if (activeCategory !== 'All') {
+      skills = skills.filter(s => s.category === activeCategory);
+    }
+
+    // Filter by search
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      skills = skills.filter(s =>
+        s.name.toLowerCase().includes(q) ||
+        s.description.toLowerCase().includes(q) ||
+        (s.author || '').toLowerCase().includes(q)
+      );
+    }
+
+    // Sort
+    if (activeSort === 'stars') {
+      skills.sort((a, b) => (b.stars || 0) - (a.stars || 0));
+    } else if (activeSort === 'newest') {
+      skills.sort((a, b) => new Date(b.last_updated) - new Date(a.last_updated));
+    } else if (activeSort === 'az') {
+      skills.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    const grid = document.getElementById('skills-grid');
+    const empty = document.getElementById('empty-state');
+
+    if (skills.length === 0) {
+      grid.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    grid.innerHTML = skills.map((s, i) => buildCard(s, i)).join('');
+  }
+
+  function buildCard(s, index) {
+    const delay = Math.min(index * 40, 400);
+    const catClass = 'cat-' + (s.category || 'Community').replace(/\s+/g, '');
+    const ago = timeAgo(s.last_updated);
+    const avatarUrl = s.author
+      ? `https://github.com/${encodeURIComponent(s.author)}.png?size=24`
+      : '';
+    const topicsHtml = (s.topics || []).length
+      ? `<div class="card-topics">${(s.topics || []).map(t => `<span class="topic-tag">${escHtml(t)}</span>`).join('')}</div>`
+      : '';
+    const forks = s.forks != null ? `<span class="card-fork">⑂ ${s.forks}</span>` : '';
+    const repoUrl = escHtml(s.repo_url || '#');
+
+    return `
+      <div class="skill-card" style="animation-delay:${delay}ms">
+        <div class="card-top">
+          <span class="card-emoji">${s.emoji || '🔧'}</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            <span class="card-star">★ ${s.stars || 0}</span>
+            ${forks}
+          </div>
+        </div>
+        <div class="card-name">${escHtml(s.name)}</div>
+        <div class="card-desc">${escHtml(s.description)}</div>
+        ${topicsHtml}
+        <div class="card-meta">
+          <span class="card-category ${catClass}">${escHtml(s.category || 'Community')}</span>
+          ${avatarUrl ? `
+            <span class="card-author">
+              <img src="${avatarUrl}" alt="${escHtml(s.author)}" onerror="this.style.display='none'"/>
+              ${escHtml(s.author)}
+            </span>` : ''}
+          <span class="card-date">${ago}</span>
+        </div>
+        <div class="card-actions">
+          <a class="btn-view" href="${repoUrl}" target="_blank" rel="noopener">
+            ↗ View on GitHub
+          </a>
+        </div>
+      </div>`;
+  }
+
+  // ── Helpers ──
+  function escHtml(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function timeAgo(iso) {
+    if (!iso) return '';
+    const diff = Date.now() - new Date(iso).getTime();
+    const days = Math.floor(diff / 86400000);
+    if (days === 0) return 'today';
+    if (days === 1) return '1 day ago';
+    if (days < 30) return `${days} days ago`;
+    const months = Math.floor(days / 30);
+    if (months === 1) return '1 month ago';
+    if (months < 12) return `${months} months ago`;
+    return `${Math.floor(months / 12)}y ago`;
+  }
+
+  function formatDate(iso) {
+    try {
+      return new Date(iso).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', timeZone:'UTC', timeZoneName:'short' });
+    } catch { return iso; }
+  }
+
+  // ── Event listeners ──
+  document.getElementById('search').addEventListener('input', e => {
+    searchQuery = e.target.value.trim();
+    render();
+  });
+
+  document.getElementById('category-tabs').addEventListener('click', e => {
+    const tab = e.target.closest('.tab');
+    if (!tab) return;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    activeCategory = tab.dataset.cat;
+    render();
+  });
+
+  document.getElementById('sort').addEventListener('change', e => {
+    activeSort = e.target.value;
+    render();
+  });
+
+  // ── Init ──
+  loadSkills();
+</script>
+</body>
+</html>
